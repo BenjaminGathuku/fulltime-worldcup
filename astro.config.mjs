@@ -3,6 +3,6 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   // TODO: change to your real domain before deploying
-  site: 'https://fulltime.example.com',
+  site: 'site: 'https://fulltimefootball.net',
   integrations: [sitemap()],
 });

@@ -11,15 +11,15 @@
 #     small OAuth provider (see README, "Admin login on Cloudflare Pages").
 backend:
   name: github
-  repo: YOUR_GITHUB_USERNAME/fulltime-worldcup   # <-- change this
+  repo: repo: BenjaminGathuku/fulltime-worldcup
   branch: main
 
 # Saves images uploaded through the dashboard into the repo
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
-site_url: https://fulltime.example.com   # <-- change to your domain
-logo_url: https://fulltime.example.com/favicon.svg
+site_url: site_url: https://fulltimefootball.net
+logo_url: site_url: https://fulltimefootball.net
 
 collections:
   - name: "articles"
