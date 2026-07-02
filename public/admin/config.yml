@@ -18,8 +18,8 @@ backend:
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
-site_url: site_url: https://fulltimefootball.net
-logo_url: site_url: https://fulltimefootball.net
+site_url: https://fulltimefootball.net
+logo_url: https://fulltimefootball.net/favicon.svg
 
 collections:
   - name: "articles"
