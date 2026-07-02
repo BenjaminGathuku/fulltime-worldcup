@@ -38,6 +38,15 @@ const tickerFacts = [
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 </head>
 <body>
+  <script is:inline>
+    // Runs before paint: use saved choice, otherwise follow the device's colour scheme
+    (function () {
+      var t = localStorage.getItem('ft-theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <div class="bg-live" aria-hidden="true"><i></i><i></i><span></span></div>
   <div class="ticker" aria-hidden="true">
     <div class="ticker__track">
       {[...tickerFacts, ...tickerFacts].map((f) => <span>{f}</span>)}
