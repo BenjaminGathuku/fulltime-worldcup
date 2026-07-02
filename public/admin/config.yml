@@ -1,0 +1,78 @@
+# FULL TIME — Decap CMS configuration
+# This powers the /admin/ publishing dashboard.
+#
+# BACKEND SETUP (one-time):
+#   Option A (easiest): deploy to Netlify, enable Identity + Git Gateway,
+#     then replace the backend block with:
+#       backend:
+#         name: git-gateway
+#         branch: main
+#   Option B (Cloudflare Pages): keep the github backend below and set up a
+#     small OAuth provider (see README, "Admin login on Cloudflare Pages").
+backend:
+  name: github
+  repo: YOUR_GITHUB_USERNAME/fulltime-worldcup   # <-- change this
+  branch: main
+
+# Saves images uploaded through the dashboard into the repo
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+site_url: https://fulltime.example.com   # <-- change to your domain
+logo_url: https://fulltime.example.com/favicon.svg
+
+collections:
+  - name: "articles"
+    label: "Articles"
+    label_singular: "Article"
+    folder: "src/content/articles"
+    create: true
+    slug: "{{slug}}"            # filename = URL slug, taken from the title
+    preview_path: "articles/{{slug}}"
+    sortable_fields: ["pubDate", "title"]
+    fields:
+      - { label: "Title (H1)", name: "title", widget: "string", hint: "Primary keyword near the front. This becomes the page H1." }
+      - { label: "Meta description", name: "description", widget: "text", pattern: ["^.{50,165}$", "Must be 50–165 characters"], hint: "Shown in Google results. Hook, not summary. Max 165 chars." }
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        options:
+          - "World Cup 2026"
+          - "World Cup History"
+          - "World Cup Finals"
+          - "Legendary Players"
+          - "Greatest Matches"
+          - "World Cup Records"
+          - "National Teams"
+          - "Managers & Coaches"
+          - "Controversies"
+          - "Host Nations"
+          - "Statistics"
+          - "Facts & Quizzes"
+      - { label: "Publish date", name: "pubDate", widget: "datetime", format: "YYYY-MM-DD", time_format: false }
+      - { label: "Read time (minutes)", name: "readMins", widget: "number", default: 5, value_type: "int", min: 1, max: 30 }
+      - { label: "Card excerpt", name: "excerpt", widget: "text", hint: "One or two punchy lines shown on the article card." }
+      - { label: "Author", name: "author", widget: "string", default: "Benjamin Gathuku", hint: "Byline shown on the article and in SEO schema." }
+      - { label: "Hero image", name: "heroImage", widget: "image", required: false, hint: "Upload the article's main image. Only use images you own or that carry a free-reuse licence (Wikimedia Commons, Unsplash, Pexels, or FULL TIME graphics)." }
+      - { label: "Hero image alt text", name: "heroAlt", widget: "string", required: false, hint: "Describe the image for accessibility and SEO." }
+      - { label: "Hero image credit", name: "heroCredit", widget: "string", required: false, hint: "e.g. Photo: Jane Doe, via Wikimedia Commons, CC BY-SA 4.0" }
+      - { label: "Draft (hide from site)", name: "draft", widget: "boolean", default: false }
+      - { label: "Featured", name: "featured", widget: "boolean", default: false, required: false }
+      - label: "Article body"
+        name: "body"
+        widget: "markdown"
+        hint: "Paste the article from the master prompt. Use ## for H2 and ### for H3."
+      - label: "Internal links (Keep reading box)"
+        name: "related"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Anchor text", name: "text", widget: "string" }
+          - { label: "Article slug", name: "slug", widget: "string", hint: "Filename of the target article, e.g. maradona-1986-four-minutes" }
+      - label: "FAQ (schema-ready)"
+        name: "faq"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Question", name: "q", widget: "string" }
+          - { label: "Answer (40–60 words)", name: "a", widget: "text" }

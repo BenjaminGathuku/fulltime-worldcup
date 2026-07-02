@@ -1,0 +1,151 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  ogType?: string;
+}
+const { title, description, ogType = 'website' } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+
+const tickerFacts = [
+  'KNOCKOUTS: GERMANY OUT · NETHERLANDS OUT · BOTH ON PENALTIES',
+  'MEXICO: 4 WINS, 8 GOALS, 0 CONCEDED · ENGLAND NEXT AT THE AZTECA',
+  'CAPE VERDE: 3 DRAWS, 0 DEFEATS · ARGENTINA AWAIT',
+  'MBAPPE BRACE SINKS SWEDEN · HAALAND SENDS NORWAY THROUGH',
+  'FINAL: 19 JULY · METLIFE STADIUM, NEW JERSEY',
+  'BRAZIL v NORWAY AND MEXICO v ENGLAND HEADLINE THE ROUND OF 16',
+];
+---
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  <link rel="sitemap" href="/sitemap-index.xml" />
+  <link rel="alternate" type="application/rss+xml" title="FULL TIME" href="/rss.xml" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content={ogType} />
+  <meta property="og:url" content={canonical} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+      {[...tickerFacts, ...tickerFacts].map((f) => <span>{f}</span>)}
+    </div>
+  </div>
+
+  <nav>
+    <a class="logo" href="/">FULL <b>TIME</b></a>
+    <ul class="nav-links">
+      <li><a href="/#latest">Latest</a></li>
+      <li><a href="/#quiz">Quiz</a></li>
+      <li><a href="/#categories">Categories</a></li>
+      <li><a href="/#faq">FAQ</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+    <div class="nav-tools">
+      <select id="langSelect" class="lang-select" aria-label="Translate this page">
+        <option value="">EN</option>
+        <option value="es">ES</option>
+        <option value="fr">FR</option>
+        <option value="pt">PT</option>
+        <option value="de">DE</option>
+        <option value="ar">AR</option>
+        <option value="sw">SW</option>
+        <option value="ja">JA</option>
+      </select>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle light and dark mode">◐</button>
+    </div>
+  </nav>
+  <div id="google_translate_element" style="display:none"></div>
+
+  <slot />
+
+  <section class="news">
+    <h2>Never miss a final whistle</h2>
+    <p>One email a week. The best stories, the sharpest stats, zero spam. Free, forever.</p>
+    <div class="news-form">
+      <input type="email" id="nlEmail" placeholder="your@email.com" aria-label="Email address" />
+      <button type="button" id="nlBtn">Sign me up</button>
+    </div>
+    <p class="news-ok" id="nlOk">You're on the team sheet. Welcome aboard.</p>
+  </section>
+
+  <footer>
+    <span>© 2026 FULL TIME · World Cup stories, told properly</span>
+    <span><a href="/admin/">Publish</a> · About · Contact · Privacy · Editorial standards</span>
+  </footer>
+
+  <script>
+    const btn = document.getElementById('nlBtn');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const input = document.getElementById('nlEmail') as HTMLInputElement;
+        const ok = document.getElementById('nlOk') as HTMLElement;
+        if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(input.value)) {
+          ok.style.display = 'block';
+          input.value = '';
+          // TODO: wire to EmailJS or Firebase here
+        } else {
+          input.focus();
+        }
+      });
+    }
+
+    /* ---- Light / dark mode toggle (persists across pages) ---- */
+    const root = document.documentElement;
+    const saved = localStorage.getItem('ft-theme');
+    if (saved) root.setAttribute('data-theme', saved);
+    const themeBtn = document.getElementById('themeToggle');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('ft-theme', next);
+      });
+    }
+
+    /* ---- Language selector (Google Translate) ---- */
+    const langSel = document.getElementById('langSelect') as HTMLSelectElement | null;
+    if (langSel) {
+      // Reflect current translation cookie in the selector
+      const m = document.cookie.match(/googtrans=\/en\/(\w+)/);
+      if (m) langSel.value = m[1];
+      langSel.addEventListener('change', () => {
+        const lang = langSel.value;
+        const host = location.hostname;
+        if (lang) {
+          document.cookie = `googtrans=/en/${lang};path=/`;
+          document.cookie = `googtrans=/en/${lang};path=/;domain=.${host}`;
+        } else {
+          document.cookie = 'googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = `googtrans=;path=/;domain=.${host};expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        }
+        location.reload();
+      });
+    }
+    // @ts-ignore
+    (window as any).googleTranslateElementInit = function () {
+      // @ts-ignore
+      new (window as any).google.translate.TranslateElement(
+        { pageLanguage: 'en', autoDisplay: false },
+        'google_translate_element'
+      );
+    };
+    const gt = document.createElement('script');
+    gt.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    gt.defer = true;
+    document.body.appendChild(gt);
+  </script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const all = (await getCollection('articles', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const categories = [...new Set(all.map((a) => a.data.category))];
+
+const CATEGORY_TILES: [string, string][] = [
+  ['World Cup 2026', 'Previews, fixtures and match reports'],
+  ['World Cup History', 'Every tournament since 1930'],
+  ['World Cup Finals', 'The matches that decided everything'],
+  ['Legendary Players', 'The icons who defined eras'],
+  ['Greatest Matches', 'Games fans still argue about'],
+  ['World Cup Records', 'Numbers that may never fall'],
+  ['National Teams', 'Stories of footballing nations'],
+  ['Managers & Coaches', 'The minds behind the medals'],
+  ['Controversies', 'Hand of God and beyond'],
+  ['Host Nations', 'Where the world came to play'],
+  ['Statistics', 'Data-driven deep dives'],
+  ['Facts & Quizzes', 'Trivia worth knowing'],
+];
+
+const slugify = (s: string) =>
+  s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+---
+<Base
+  title="FULL TIME — World Cup Stories, Told Properly"
+  description="FIFA World Cup history, legendary players, iconic matches and the 2026 tournament — written by football fans, for football fans."
+>
+  <header class="hero" id="top">
+    <p class="hero__eyebrow"><span class="live"></span>Knockout rounds · Win or go home</p>
+    <h1>The giants are <em>falling</em>.</h1>
+    <p>
+      Germany, gone. The Netherlands, gone. Cape Verde still standing. Three weeks into the
+      biggest World Cup ever staged, the tournament has stopped being polite. FULL TIME is at
+      every twist — written by fans, checked like journalism.
+    </p>
+    <a class="btn" href="#latest">Read the latest</a>
+    <a class="btn btn--ghost" href="#quiz">Test your knowledge</a>
+
+    <div class="board" role="timer" aria-label="Countdown to the 2026 World Cup final">
+      <div class="board__cell"><span class="board__label">Days</span><span class="board__num" id="cd-d">--</span></div>
+      <span class="board__sep">:</span>
+      <div class="board__cell"><span class="board__label">Hrs</span><span class="board__num" id="cd-h">--</span></div>
+      <span class="board__sep">:</span>
+      <div class="board__cell"><span class="board__label">Min</span><span class="board__num" id="cd-m">--</span></div>
+      <span class="board__sep">:</span>
+      <div class="board__cell"><span class="board__label">Sec</span><span class="board__num" id="cd-s">--</span></div>
+      <div class="board__cell" style="margin-left:.8rem">
+        <span class="board__label">Until</span>
+        <span class="board__num" style="font-size:.85rem;padding:.55rem .5rem">THE FINAL</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="stat__n">48</div><div class="stat__l">Teams</div></div>
+    <div class="stat"><div class="stat__n">104</div><div class="stat__l">Matches</div></div>
+    <div class="stat"><div class="stat__n">16</div><div class="stat__l">Host Cities</div></div>
+    <div class="stat"><div class="stat__n">3</div><div class="stat__l">Host Nations</div></div>
+    <div class="stat"><div class="stat__n">22</div><div class="stat__l">Editions Played</div></div>
+  </div>
+
+  <section id="latest">
+    <div class="sec-head">
+      <h2>Latest stories</h2>
+      <span class="tag">From the press box</span>
+    </div>
+    <div class="filters" id="filters">
+      <button class="chip on" data-cat="All">All</button>
+      {categories.map((c) => <button class="chip" data-cat={c}>{c}</button>)}
+      <input class="search" id="search" type="search" placeholder="Search articles…" aria-label="Search articles" />
+    </div>
+    <div class="grid" id="grid">
+      {all.map((a) => (
+        <a
+          class="card"
+          href={`/articles/${a.id}/`}
+          data-cat={a.data.category}
+          data-search={`${a.data.title} ${a.data.excerpt} ${a.data.category}`.toLowerCase()}
+        >
+          <div class="card__band"></div>
+          <div class="card__body">
+            <span class="card__cat">{a.data.category}</span>
+            <h3>{a.data.title}</h3>
+            <p>{a.data.excerpt}</p>
+            <div class="card__meta">
+              <span>{fmt(a.data.pubDate)} · {a.data.readMins} min read</span>
+              <span class="card__read">Read →</span>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+    <div class="empty" id="empty">No matches found. Try a different search — or a different category.</div>
+  </section>
+
+  <section id="quiz" class="alt">
+    <div class="sec-head">
+      <h2>The terrace quiz</h2>
+      <span class="tag">5 questions · no VAR</span>
+    </div>
+    <div class="quiz-wrap" id="quizBox"></div>
+  </section>
+
+  <section id="categories">
+    <div class="sec-head">
+      <h2>Explore the archive</h2>
+      <span class="tag">Every angle of the World Cup</span>
+    </div>
+    <div class="cats">
+      {CATEGORY_TILES.map(([name, desc]) => (
+        <a class="cat-tile" href={`/category/${slugify(name)}/`}>
+          <b>{name}</b>
+          <span>{desc}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section id="faq" class="alt">
+    <div class="sec-head">
+      <h2>Quick answers</h2>
+      <span class="tag">Frequently asked</span>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>When is the 2026 World Cup final?</summary>
+        <p>The final is scheduled for 19 July 2026 at MetLife Stadium in East Rutherford, New Jersey. It will crown the champion of the first 48-team World Cup.</p>
+      </details>
+      <details>
+        <summary>How many teams play at the 2026 World Cup?</summary>
+        <p>Forty-eight — up from thirty-two. The expanded format produces 104 matches across the United States, Canada and Mexico, the most in World Cup history.</p>
+      </details>
+      <details>
+        <summary>Who has won the most World Cups?</summary>
+        <p>Brazil, with five titles: 1958, 1962, 1970, 1994 and 2002. They remain the only nation to have appeared at every World Cup.</p>
+      </details>
+      <details>
+        <summary>Who is the World Cup's all-time top scorer?</summary>
+        <p>Miroslav Klose of Germany, with 16 goals across four tournaments from 2002 to 2014. He broke Ronaldo's record of 15 at the 2014 World Cup in Brazil.</p>
+      </details>
+      <details>
+        <summary>Which country hosted the first World Cup?</summary>
+        <p>Uruguay, in 1930. The hosts beat Argentina 4–2 in the final in Montevideo, at the purpose-built Estadio Centenario.</p>
+      </details>
+    </div>
+  </section>
+
+  <script>
+    /* countdown */
+    const FINAL = new Date('2026-07-19T19:00:00-04:00').getTime();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    function tick() {
+      let d = FINAL - Date.now();
+      if (d < 0) d = 0;
+      (document.getElementById('cd-d') as HTMLElement).textContent = pad(Math.floor(d / 864e5));
+      (document.getElementById('cd-h') as HTMLElement).textContent = pad(Math.floor(d / 36e5) % 24);
+      (document.getElementById('cd-m') as HTMLElement).textContent = pad(Math.floor(d / 6e4) % 60);
+      (document.getElementById('cd-s') as HTMLElement).textContent = pad(Math.floor(d / 1e3) % 60);
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    /* filters + search over server-rendered cards */
+    let activeCat = 'All';
+    const cards = [...document.querySelectorAll<HTMLElement>('.card')];
+    const searchEl = document.getElementById('search') as HTMLInputElement;
+    const emptyEl = document.getElementById('empty') as HTMLElement;
+    function applyFilter() {
+      const q = searchEl.value.trim().toLowerCase();
+      let visible = 0;
+      cards.forEach((c) => {
+        const show =
+          (activeCat === 'All' || c.dataset.cat === activeCat) &&
+          (!q || (c.dataset.search || '').includes(q));
+        c.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      emptyEl.style.display = visible ? 'none' : 'block';
+    }
+    document.querySelectorAll<HTMLElement>('.chip[data-cat]').forEach((b) =>
+      b.addEventListener('click', () => {
+        activeCat = b.dataset.cat || 'All';
+        document.querySelectorAll('.chip[data-cat]').forEach((x) => x.classList.toggle('on', x === b));
+        applyFilter();
+      })
+    );
+    searchEl.addEventListener('input', applyFilter);
+
+    /* quiz */
+    const QUIZ = [
+      { q: 'Who won the 2022 World Cup?', opts: ['France', 'Argentina', 'Brazil', 'Croatia'], a: 1, note: 'Argentina beat France on penalties after a 3–3 thriller in Lusail.' },
+      { q: "Who is the World Cup's all-time top scorer?", opts: ['Pelé', 'Ronaldo (Brazil)', 'Miroslav Klose', 'Lionel Messi'], a: 2, note: 'Klose scored 16 goals across four tournaments (2002–2014).' },
+      { q: 'Which country hosted the first World Cup in 1930?', opts: ['Italy', 'Brazil', 'Uruguay', 'France'], a: 2, note: 'Uruguay hosted and won it, beating Argentina 4–2 in the final.' },
+      { q: 'How many teams play at the 2026 World Cup?', opts: ['32', '40', '48', '64'], a: 2, note: '48 teams and 104 matches — the biggest World Cup ever.' },
+      { q: 'Who is the only player to win three World Cups?', opts: ['Maradona', 'Pelé', 'Cafu', 'Beckenbauer'], a: 1, note: 'Pelé won in 1958, 1962 and 1970 with Brazil.' },
+    ];
+    const quizBox = document.getElementById('quizBox') as HTMLElement;
+    let qi = 0, score = 0, locked = false;
+    function drawQuiz() {
+      if (qi >= QUIZ.length) {
+        const verdict =
+          score === 5 ? "Ballon d'Or stuff. Flawless."
+          : score >= 4 ? 'Top of the group. Seasoned fan.'
+          : score >= 3 ? 'Through on goal difference. Respectable.'
+          : score >= 2 ? 'Group-stage exit. More archive reading needed.'
+          : 'Sacked in the morning. Start with our History section.';
+        quizBox.innerHTML = `<p class="quiz-prog">Full time</p>
+          <div class="quiz-score">${score} / ${QUIZ.length}</div>
+          <p class="quiz-verdict">${verdict}</p>
+          <div class="center"><button class="btn" id="qAgain">Play again</button></div>`;
+        (document.getElementById('qAgain') as HTMLElement).onclick = () => { qi = 0; score = 0; drawQuiz(); };
+        return;
+      }
+      const q = QUIZ[qi];
+      locked = false;
+      quizBox.innerHTML = `<p class="quiz-prog">Question ${qi + 1} of ${QUIZ.length} · Score ${score}</p>
+        <p class="quiz-q">${q.q}</p>
+        <div class="quiz-opts">${q.opts.map((o, i) => `<button class="quiz-opt" data-i="${i}">${o}</button>`).join('')}</div>
+        <p class="quiz-note" id="qNote"></p>`;
+      quizBox.querySelectorAll<HTMLElement>('.quiz-opt').forEach((b) => {
+        b.onclick = () => {
+          if (locked) return;
+          locked = true;
+          const i = Number(b.dataset.i);
+          quizBox.querySelectorAll('.quiz-opt')[q.a].classList.add('right');
+          if (i === q.a) score++;
+          else b.classList.add('wrong');
+          (document.getElementById('qNote') as HTMLElement).textContent = q.note;
+          setTimeout(() => { qi++; drawQuiz(); }, 1800);
+        };
+      });
+    }
+    drawQuiz();
+  </script>
+</Base>

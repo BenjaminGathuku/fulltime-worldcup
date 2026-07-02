@@ -1,0 +1,93 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles', ({ data }) => !data.draft);
+  return articles.map((a) => ({ params: { slug: a.id }, props: { article: a } }));
+}
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+const d = article.data;
+
+const slugify = (s: string) =>
+  s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+const fmt = d.pubDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: d.title,
+  description: d.description,
+  datePublished: d.pubDate.toISOString(),
+  author: { '@type': 'Person', name: d.author },
+  articleSection: d.category,
+  publisher: { '@type': 'Organization', name: 'FULL TIME' },
+  mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).toString(),
+};
+
+const faqLd = d.faq?.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: d.faq.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    }
+  : null;
+---
+<Base title={`${d.title} — FULL TIME`} description={d.description} ogType="article">
+  <div class="prog" id="prog"></div>
+  <article class="article">
+    <div class="article__wrap">
+      <a class="article__cat" href={`/category/${slugify(d.category)}/`}>{d.category}</a>
+      <h1>{d.title}</h1>
+      <div class="article__meta">{fmt} · {d.readMins} min read · By {d.author} for FULL TIME</div>
+      {d.heroImage && (
+        <figure class="article__hero">
+          <img src={d.heroImage} alt={d.heroAlt ?? d.title} loading="eager" />
+          {d.heroCredit && <figcaption>{d.heroCredit}</figcaption>}
+        </figure>
+      )}
+      <div class="article__body">
+        <Content />
+      </div>
+
+      {d.related?.length && (
+        <div class="article__links">
+          <b>Keep reading</b>
+          {d.related.map((r) => (
+            <div>→ <a href={`/articles/${r.slug}/`}>{r.text}</a></div>
+          ))}
+        </div>
+      )}
+
+      {d.faq?.length && (
+        <div class="article__faq">
+          <h2>Quick answers</h2>
+          {d.faq.map((f) => (
+            <details>
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+        </div>
+      )}
+    </div>
+  </article>
+
+  <script type="application/ld+json" set:html={JSON.stringify(articleLd)} />
+  {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
+
+  <script>
+    const bar = document.getElementById('prog') as HTMLElement;
+    addEventListener('scroll', () => {
+      const total = document.documentElement.scrollHeight - innerHeight;
+      bar.style.width = Math.min(100, Math.max(0, (scrollY / total) * 100)) + '%';
+    });
+  </script>
+</Base>

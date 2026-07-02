@@ -1,0 +1,68 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const slugify = (s: string) =>
+  s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+export async function getStaticPaths() {
+  const slugifyFn = (s: string) =>
+    s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  const SITE_CATEGORIES = [
+    'World Cup 2026', 'World Cup History', 'World Cup Finals', 'Legendary Players',
+    'Greatest Matches', 'World Cup Records', 'National Teams', 'Managers & Coaches',
+    'Controversies', 'Host Nations', 'Statistics', 'Facts & Quizzes',
+  ];
+  const all = await getCollection('articles', ({ data }) => !data.draft);
+  const fromArticles = [...new Set(all.map((a) => a.data.category))];
+  const categories = [...new Set([...SITE_CATEGORIES, ...fromArticles])];
+
+  return categories.map((category) => ({
+    params: { category: slugifyFn(category) },
+    props: {
+      category,
+      articles: all
+        .filter((a) => a.data.category === category)
+        .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+    },
+  }));
+}
+
+const { category, articles } = Astro.props;
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+---
+<Base
+  title={`${category} — FULL TIME`}
+  description={`${category}: World Cup stories, analysis and history from FULL TIME.`}
+>
+  <section>
+    <div class="sec-head">
+      <h2>{category}</h2>
+      <a class="tag" href="/#latest">← All stories</a>
+    </div>
+    {articles.length === 0 ? (
+      <div class="empty" style="display:block">
+        Nothing here yet. The press box is typing — check back soon.
+      </div>
+    ) : (
+      <div class="grid">
+        {articles.map((a) => (
+          <a class="card" href={`/articles/${a.id}/`}>
+            <div class="card__band"></div>
+            <div class="card__body">
+              <span class="card__cat">{a.data.category}</span>
+              <h3>{a.data.title}</h3>
+              <p>{a.data.excerpt}</p>
+              <div class="card__meta">
+                <span>{fmt(a.data.pubDate)} · {a.data.readMins} min read</span>
+                <span class="card__read">Read →</span>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+</Base>
