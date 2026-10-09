@@ -1,6 +1,6 @@
 ---
 title: "Nations League 2026: Every Group, Every Drama, Everything You Need to Know"
-description: "The 2026-27 UEFA Nations League is under way and it is already full of drama. England's big wins, Portugal without Ronaldo, France's Olise era. Full guide to where every team stands."
+description: "England thrash Croatia 7-0, Ronaldo walks out, Olise breaks records. Full guide to the 2026-27 UEFA Nations League groups and standings."
 category: "World Cup 2026"
 pubDate: 2026-10-07
 readMins: 8

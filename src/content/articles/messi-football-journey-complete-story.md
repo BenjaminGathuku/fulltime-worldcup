@@ -1,6 +1,6 @@
 ---
 title: "The Boy from Rosario: Lionel Messi's Complete Football Journey"
-description: "From a growth hormone injection in Argentina to eight Ballon d'Ors, six World Cups, and a farewell at the Monumental. The full story of the greatest footballer who ever lived."
+description: "From a growth hormone injection to eight Ballon d'Ors and a World Cup. The complete story of the greatest footballer who ever lived."
 category: "Legendary Players"
 pubDate: 2026-10-09
 readMins: 14
